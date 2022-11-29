@@ -1,4 +1,7 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class KitReviewView extends StatefulWidget {
   const KitReviewView({Key? key}) : super(key: key);
@@ -13,6 +16,7 @@ class KitReviewView extends StatefulWidget {
 
 class _KitReviewViewState extends State<KitReviewView> {
   final _kitIDController = TextEditingController();
+  MobileScannerController cameraController = MobileScannerController();
 
   @override
   void initState() {
@@ -118,6 +122,23 @@ class _KitReviewViewState extends State<KitReviewView> {
                       child: Text("Enter Kit ID"),
                     ),
                   ),
+                  SizedBox(
+                    width: 240,
+                    height: 240,
+                    child: MobileScanner(
+                      allowDuplicates: false,
+                      controller: cameraController,
+                      onDetect: (barcode, args) {
+                        if (barcode.rawValue == null) {
+                          debugPrint('Failed to scan Barcode');
+                        } else {
+                          final String code = barcode.rawValue!;
+                          _kitIDController.text = code;
+                          debugPrint('Barcode found! $code');
+                        }
+                      },
+                    ),
+                  )
                 ],
               ),
             ),
