@@ -73,7 +73,7 @@ class _LoginViewState extends State<LoginView> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
         children: [
-          const Text('Sign in via the magic link with your email below'),
+          const Text('Sign In Below'),
           const SizedBox(height: 18),
           TextFormField(
             controller: _emailController,
