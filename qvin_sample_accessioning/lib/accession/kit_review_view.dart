@@ -121,13 +121,13 @@ class _KitReviewViewState extends State<KitReviewView> {
                     width: 240,
                     child: ElevatedButton(
                       onPressed: () => {},
-                      child: Text("Enter Kit ID"),
+                      child: Text("Search"),
                     ),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: 240,
-                    child: ElevatedButton(
+                    child: TextButton(
                       onPressed: () {
                         setState(() {
                           isCameraApproved = true;
