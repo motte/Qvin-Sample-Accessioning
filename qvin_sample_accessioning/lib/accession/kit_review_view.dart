@@ -17,6 +17,8 @@ class KitReviewView extends StatefulWidget {
 class _KitReviewViewState extends State<KitReviewView> {
   final _kitIDController = TextEditingController();
   MobileScannerController cameraController = MobileScannerController();
+  bool isCameraApproved = false;
+  bool isScanningCode = false;
 
   @override
   void initState() {
@@ -94,8 +96,8 @@ class _KitReviewViewState extends State<KitReviewView> {
             const Spacer(),
             Container(
               alignment: Alignment.topCenter,
-              constraints: const BoxConstraints(
-                maxWidth: 300,
+              constraints: BoxConstraints(
+                maxWidth: 320,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -122,23 +124,62 @@ class _KitReviewViewState extends State<KitReviewView> {
                       child: Text("Enter Kit ID"),
                     ),
                   ),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: 240,
-                    height: 240,
-                    child: MobileScanner(
-                      allowDuplicates: false,
-                      controller: cameraController,
-                      onDetect: (barcode, args) {
-                        if (barcode.rawValue == null) {
-                          debugPrint('Failed to scan Barcode');
-                        } else {
-                          final String code = barcode.rawValue!;
-                          _kitIDController.text = code;
-                          debugPrint('Barcode found! $code');
-                        }
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          isCameraApproved = true;
+                          isScanningCode = !isScanningCode;
+                        });
                       },
+                      child: Column(
+                        children: [
+                          if (isScanningCode == true)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(Icons.exit_to_app),
+                                Text("Close"),
+                              ],
+                            )
+                          else
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(Icons.qr_code),
+                                Text("Scan"),
+                              ],
+                            )
+                        ],
+                      ),
                     ),
-                  )
+                  ),
+                  const SizedBox(height: 16),
+                  if (isCameraApproved == true)
+                    SizedBox(
+                      width: 240,
+                      height: 240,
+                      child: Opacity(
+                        opacity: isScanningCode == true ? 1 : 0,
+                        child: MobileScanner(
+                          allowDuplicates: false,
+                          controller: cameraController,
+                          onDetect: (barcode, args) {
+                            if (barcode.rawValue == null) {
+                              debugPrint('Failed to scan Barcode');
+                            } else {
+                              final String code = barcode.rawValue!;
+                              _kitIDController.text = code;
+                              debugPrint('Barcode found! $code');
+                            }
+                          },
+                        ),
+                      ),
+                    )
                 ],
               ),
             ),
