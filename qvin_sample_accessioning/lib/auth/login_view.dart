@@ -29,6 +29,7 @@ class _LoginViewState extends State<LoginView> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+      Navigator.of(context).pushReplacementNamed('/account');
       // Navigator.of(context).pushAndRemoveUntil(AccountView.route(), (route) => false);
     } on AuthException catch (error) {
       context.showErrorSnackBar(message: error.message);
@@ -37,7 +38,7 @@ class _LoginViewState extends State<LoginView> {
     }
     if (mounted) {
       setState(() {
-        _isLoading = true;
+        _isLoading = false;
       });
     }
   }
