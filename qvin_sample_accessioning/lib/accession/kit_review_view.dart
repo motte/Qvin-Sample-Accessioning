@@ -22,7 +22,7 @@ class _KitReviewViewState extends State<KitReviewView> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false, // Removes the back button.
-        title: const Text('Sample Accession'),
+        title: const Text(''),
         flexibleSpace: Container(
           alignment: Alignment.center,
           child: Row(
