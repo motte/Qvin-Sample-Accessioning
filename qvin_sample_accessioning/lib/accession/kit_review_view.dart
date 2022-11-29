@@ -21,6 +21,7 @@ class _KitReviewViewState extends State<KitReviewView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Removes the back button.
         title: const Text('Sample Accession'),
         flexibleSpace: Container(
           alignment: Alignment.center,

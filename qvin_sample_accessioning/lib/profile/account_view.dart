@@ -110,6 +110,7 @@ class _AccountViewState extends State<AccountView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Removes the back button.
         title: const Text('Account'),
         flexibleSpace: Container(
             alignment: Alignment.center,

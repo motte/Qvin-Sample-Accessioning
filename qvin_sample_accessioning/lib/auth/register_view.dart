@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qvin_sample_accessioning/auth/login_view.dart';
 import 'package:qvin_sample_accessioning/shared/constants.dart';
-import 'package:qvin_sample_accessioning/splash/splash_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterView extends StatefulWidget {
@@ -53,6 +52,7 @@ class _RegisterViewState extends State<RegisterView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register'),
+        automaticallyImplyLeading: false, // Removes the back button.
       ),
       body: Form(
         key: _formKey,

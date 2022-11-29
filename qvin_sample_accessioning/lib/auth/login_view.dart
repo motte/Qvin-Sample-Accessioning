@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:qvin_sample_accessioning/profile/account_view.dart';
 import 'package:qvin_sample_accessioning/shared/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -68,7 +67,9 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
+      appBar: AppBar(
+          automaticallyImplyLeading: false, // Removes the back button.
+          title: const Text('Sign In')),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
         children: [
