@@ -27,6 +27,18 @@ class _KitReviewViewState extends State<KitReviewView> {
           alignment: Alignment.center,
           child: Row(
             children: [
+              const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  semanticLabel: "Menu",
+                  color: Colors.white,
+                ),
+                iconSize: 24,
+                onPressed: () {},
+              ),
+              const SizedBox(width: 16),
+              Image.asset("images/Qvin-small-logo.png", height: 24),
               const Spacer(),
               TextButton(
                 onPressed: () {
