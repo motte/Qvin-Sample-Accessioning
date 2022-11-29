@@ -12,6 +12,8 @@ class KitReviewView extends StatefulWidget {
 }
 
 class _KitReviewViewState extends State<KitReviewView> {
+  final _kitIDController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -80,6 +82,47 @@ class _KitReviewViewState extends State<KitReviewView> {
               const SizedBox(width: 8),
             ],
           ),
+        ),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            const Spacer(),
+            Container(
+              alignment: Alignment.topCenter,
+              constraints: const BoxConstraints(
+                maxWidth: 300,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Scan Pouch, Kit-ID or Strip ID",
+                    style: TextStyle(fontSize: 24),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: 240,
+                    child: TextField(
+                      autofocus: true,
+                      controller: _kitIDController,
+                      decoration: const InputDecoration(labelText: 'kit ID'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: 240,
+                    child: ElevatedButton(
+                      onPressed: () => {},
+                      child: Text("Enter Kit ID"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+          ],
         ),
       ),
     );
