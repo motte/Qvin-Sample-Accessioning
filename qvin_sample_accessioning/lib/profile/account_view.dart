@@ -151,6 +151,25 @@ class _AccountViewState extends State<AccountView> {
                 ),
                 const SizedBox(width: 16),
                 TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed('/accession');
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.science_rounded,
+                          size: 16,
+                          semanticLabel: 'Accession Sample',
+                        ),
+                        const SizedBox(width: 4),
+                        const Text('Accession'),
+                      ],
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                    )),
+                const SizedBox(width: 16),
+                TextButton(
                     onPressed: _signOut,
                     child: Row(
                       children: [
