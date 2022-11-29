@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:qvin_sample_accessioning/accession/kit_review_view.dart';
 import 'package:qvin_sample_accessioning/auth/login_view.dart';
 import 'package:qvin_sample_accessioning/auth/register_view.dart';
 import 'package:qvin_sample_accessioning/profile/account_view.dart';
@@ -64,6 +65,8 @@ class MyApp extends StatelessWidget {
           switch (settings.name) {
             case '/':
               return MaterialPageRoute(builder: (_) => const SplashView());
+            case '/accession':
+              return MaterialPageRoute(builder: (_) => const KitReviewView());
             case '/account':
               return MaterialPageRoute(builder: (_) => const AccountView());
           }
