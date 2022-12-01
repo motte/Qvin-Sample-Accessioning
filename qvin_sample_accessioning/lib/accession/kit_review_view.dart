@@ -44,7 +44,7 @@ class _KitReviewViewState extends State<KitReviewView> {
                 onPressed: () {},
               ),
               const SizedBox(width: 16),
-              Image.asset("images/Qvin-small-logo.png", height: 24),
+              Image.asset("images/Qvin-small-logo-dark.png", height: 24),
               const Spacer(),
               TextButton(
                 onPressed: () {
