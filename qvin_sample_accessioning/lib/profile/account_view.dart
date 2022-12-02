@@ -41,7 +41,7 @@ class _AccountViewState extends State<AccountView> {
     } on PostgrestException catch (error) {
       context.showErrorSnackBar(message: error.message);
     } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpected exception occurred');
+      context.showErrorSnackBar(message: 'An unexpected exception occurred');
     }
 
     setState(() {
@@ -72,7 +72,7 @@ class _AccountViewState extends State<AccountView> {
     } on PostgrestException catch (error) {
       context.showErrorSnackBar(message: error.message);
     } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpeted error occurred');
+      context.showErrorSnackBar(message: 'An unexpected error occurred');
     }
     setState(() {
       _loading = false;
@@ -85,7 +85,7 @@ class _AccountViewState extends State<AccountView> {
     } on AuthException catch (error) {
       context.showErrorSnackBar(message: error.message);
     } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpected error occurred');
+      context.showErrorSnackBar(message: 'An unexpected error occurred');
     }
     if (mounted) {
       Navigator.of(context).pushReplacementNamed('/');
@@ -198,7 +198,7 @@ class _AccountViewState extends State<AccountView> {
                 maxWidth: 1200,
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                padding: const EdgeInsets.fromLTRB(8, 8, 24, 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -206,7 +206,7 @@ class _AccountViewState extends State<AccountView> {
                       child: Avatar(
                         imageUrl: _profileURLController.text,
                         onUpload: (String) {
-                          print('slkdjf');
+                          print('TODO: Need to upload profile image.');
                         },
                       ),
                     ),
@@ -215,7 +215,15 @@ class _AccountViewState extends State<AccountView> {
                       child: Column(
                         children: [
                           const SizedBox(height: 18),
-                          Text(_humanIdController.text),
+                          Row(
+                            children: [
+                              Text("HumanID: "),
+                              Text(
+                                _humanIdController.text,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 18),
                           TextFormField(
                             controller: _firstNameController,
