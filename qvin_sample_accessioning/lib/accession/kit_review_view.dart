@@ -14,7 +14,7 @@ class KitReviewView extends StatefulWidget {
 
 class _KitReviewViewState extends State<KitReviewView> {
   final _kitIDController = TextEditingController();
-  MobileScannerController cameraController = MobileScannerController();
+  final MobileScannerController _cameraController = MobileScannerController();
   bool isCameraApproved = false;
   bool isScanningCode = false;
 
@@ -26,8 +26,16 @@ class _KitReviewViewState extends State<KitReviewView> {
   @override
   void dispose() {
     super.dispose();
-    cameraController.stop();
-    cameraController.dispose();
+    _cameraController.stop();
+    _cameraController.dispose();
+  }
+
+  void _toggleScanner() {
+    /// TODO: Consider destroying MobileScannerController() when camera is hidden, so the red recording dot disappears when the camera is gone.  A simple _cameraController.start() and .stop() seems to break the camera.
+    setState(() {
+      isCameraApproved = true;
+      isScanningCode = !isScanningCode;
+    });
   }
 
   @override
@@ -127,7 +135,7 @@ class _KitReviewViewState extends State<KitReviewView> {
                     SizedBox(
                       width: 240,
                       child: ElevatedButton(
-                        onPressed: () => {},
+                        onPressed: () => {_kitIDController.text},
                         child: Text("Search"),
                       ),
                     ),
@@ -136,10 +144,7 @@ class _KitReviewViewState extends State<KitReviewView> {
                       width: 240,
                       child: TextButton(
                         onPressed: () {
-                          setState(() {
-                            isCameraApproved = true;
-                            isScanningCode = !isScanningCode;
-                          });
+                          _toggleScanner();
                         },
                         child: Column(
                           children: [
@@ -174,7 +179,7 @@ class _KitReviewViewState extends State<KitReviewView> {
                           opacity: isScanningCode == true ? 1 : 0,
                           child: MobileScanner(
                             allowDuplicates: false,
-                            controller: cameraController,
+                            controller: _cameraController,
                             onDetect: (barcode, args) {
                               if (barcode.rawValue == null) {
                                 debugPrint('Failed to scan Barcode');
