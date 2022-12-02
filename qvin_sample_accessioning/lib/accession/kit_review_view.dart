@@ -24,6 +24,13 @@ class _KitReviewViewState extends State<KitReviewView> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    cameraController.stop();
+    cameraController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
