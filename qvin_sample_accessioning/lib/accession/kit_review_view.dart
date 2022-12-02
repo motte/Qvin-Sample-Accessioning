@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qvin_sample_accessioning/shared/constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class KitReviewView extends StatefulWidget {
   const KitReviewView({Key? key}) : super(key: key);
@@ -17,6 +19,8 @@ class _KitReviewViewState extends State<KitReviewView> {
   final MobileScannerController _cameraController = MobileScannerController();
   bool isCameraApproved = false;
   bool isScanningCode = false;
+  bool _loading = true;
+  Map<dynamic, dynamic> _currentKit = {};
 
   @override
   void initState() {
@@ -36,6 +40,105 @@ class _KitReviewViewState extends State<KitReviewView> {
       isCameraApproved = true;
       isScanningCode = !isScanningCode;
     });
+  }
+
+  Future<void> _getKit() async {
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      final inputId = _kitIDController.text.toLowerCase();
+
+      /// Search for object.
+      if (inputId.startsWith("q") == true) {
+        /// This inputId seems to be a Q-Pad id, so search Kit.
+        final data = await supabase
+            .from('kit')
+            .select()
+            .ilike('kit_id', '%' + inputId + '%')
+            .single() as Map;
+
+        print(data);
+        // Store kit object.
+        // _currentKit = data;
+      } else if (inputId.startsWith("s") == true) {
+        /// This inputId seems to be a strip id, so search Strip.
+        final data =
+            await supabase.from('strip').select().eq('strip_id', inputId);
+        print(data);
+      }
+    } on PostgrestException catch (error) {
+      context.showErrorSnackBar(message: error.message);
+    } catch (error) {
+      context.showErrorSnackBar(message: 'An unexpected exception occurred');
+    }
+
+    setState(() {
+      _loading = false;
+    });
+  }
+
+  Future<void> _getStripsBy(List<String> ids,
+      ValueSetter<List<Map<dynamic, dynamic>>> onSuccess) async {
+    /// TODO: Determine if there are typesets or type aliases to replace ValueSetter<List<Map<dynamic, dynamic>>> to something like ValueSetListMap.
+    try {
+      final inputId = _kitIDController.text.toLowerCase();
+      List<String> stripIds = ids;
+      List<Map<dynamic, dynamic>> listResult = [];
+
+      for (var id in ids) {
+        String stripId = id.toLowerCase();
+        if (stripId.startsWith("s") == true) {
+          /// If this is a valid strip Id.
+          /// TODO: Obviously need to know what a valid stripID looks like, so edit in future.
+          stripIds.add(stripId);
+        } else {
+          /// If this does not seem to be a valid strip id.
+          /// TODO: Do something about invalid strip ids.
+          print(
+              "Invalid strip id " + stripId + "was removed from being pulled.");
+        }
+      }
+
+      if (stripIds.isNotEmpty) {
+        /// Search for strip objects by list of ids.
+        final data = await supabase
+            .from('strip')
+            .select()
+            .in_('strip_id', ids)
+            .limit(stripIds.length);
+
+        /// callback with data.
+        onSuccess(data);
+      }
+    } on PostgrestException catch (error) {
+      context.showErrorSnackBar(message: error.message);
+    } catch (error) {
+      context.showErrorSnackBar(message: 'An unexpected exception occurred');
+    }
+  }
+
+  Future<void> _getStripBy(
+      String id, ValueSetter<Map<dynamic, dynamic>> onSuccess) async {
+    try {
+      final inputId = _kitIDController.text.toLowerCase();
+
+      /// Search for object.
+      if (inputId.startsWith("s")) {
+        /// This inputId seems to be a strip id, so search Strip.
+        final data =
+            await supabase.from('strip').select().eq('strip_id', inputId);
+        onSuccess(data);
+      } else {
+        /// TODO: Need to handle invalid strip ids in _getStripBy().
+        print("This doesn't seem to be a valid strip id.");
+      }
+    } on PostgrestException catch (error) {
+      context.showErrorSnackBar(message: error.message);
+    } catch (error) {
+      context.showErrorSnackBar(message: 'An unexpected exception occurred');
+    }
   }
 
   @override
@@ -108,7 +211,6 @@ class _KitReviewViewState extends State<KitReviewView> {
           child: new ListView(
             shrinkWrap: true,
             children: [
-              const Spacer(),
               Container(
                 alignment: Alignment.topCenter,
                 constraints: BoxConstraints(
@@ -135,8 +237,26 @@ class _KitReviewViewState extends State<KitReviewView> {
                     SizedBox(
                       width: 240,
                       child: ElevatedButton(
-                        onPressed: () => {_kitIDController.text},
-                        child: Text("Search"),
+                        onPressed: () => {_getKit()},
+                        child: Row(
+                          children: [
+                            const Spacer(),
+                            if (_loading == true)
+                              Container(
+                                  width: 16,
+                                  height: 16,
+                                  child: Center(
+                                      child: CircularProgressIndicator(
+                                    strokeWidth: 1,
+                                    color: Colors.white,
+                                  ))),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Text("Search"),
+                            const Spacer(),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -177,21 +297,28 @@ class _KitReviewViewState extends State<KitReviewView> {
                         height: 240,
                         child: Opacity(
                           opacity: isScanningCode == true ? 1 : 0,
-                          child: MobileScanner(
-                            allowDuplicates: false,
-                            controller: _cameraController,
-                            onDetect: (barcode, args) {
-                              if (barcode.rawValue == null) {
-                                debugPrint('Failed to scan Barcode');
-                              } else {
-                                final String code = barcode.rawValue!;
-                                _kitIDController.text = code;
-                                debugPrint('Barcode found! $code');
-                              }
-                            },
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: MobileScanner(
+                                  fit: BoxFit.fitHeight,
+                                  allowDuplicates: false,
+                                  controller: _cameraController,
+                                  onDetect: (barcode, args) {
+                                    if (barcode.rawValue == null) {
+                                      debugPrint('Failed to scan Barcode');
+                                    } else {
+                                      final String code = barcode.rawValue!;
+                                      _kitIDController.text = code;
+                                      debugPrint('Barcode found! $code');
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      )
+                      ),
                   ],
                 ),
               ),
