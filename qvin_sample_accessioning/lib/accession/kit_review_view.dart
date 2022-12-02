@@ -19,7 +19,7 @@ class _KitReviewViewState extends State<KitReviewView> {
   final MobileScannerController _cameraController = MobileScannerController();
   bool isCameraApproved = false;
   bool isScanningCode = false;
-  bool _loading = true;
+  bool _loading = false;
   Map<dynamic, dynamic> _currentKit = {};
 
   @override
@@ -57,11 +57,13 @@ class _KitReviewViewState extends State<KitReviewView> {
             .from('kit')
             .select()
             .ilike('kit_id', '%' + inputId + '%')
-            .single() as Map;
 
-        print(data);
+            /// Consider making this eq() again for strictness.
+            .single() as Map;
         // Store kit object.
-        // _currentKit = data;
+        _currentKit = data;
+
+        _showSimpleModalDialog(context);
       } else if (inputId.startsWith("s") == true) {
         /// This inputId seems to be a strip id, so search Strip.
         final data =
@@ -69,7 +71,13 @@ class _KitReviewViewState extends State<KitReviewView> {
         print(data);
       }
     } on PostgrestException catch (error) {
-      context.showErrorSnackBar(message: error.message);
+      if (error.code == "PGRST116") {
+        /// If there were not objects sent back.
+        /// TODO: This pgsql error PGRST116 is currently hardcoded.  Make a map of errors minimally.
+        context.showErrorSnackBar(message: "No Sample Found From ID");
+      } else {
+        context.showErrorSnackBar(message: error.message);
+      }
     } catch (error) {
       context.showErrorSnackBar(message: 'An unexpected exception occurred');
     }
@@ -77,6 +85,199 @@ class _KitReviewViewState extends State<KitReviewView> {
     setState(() {
       _loading = false;
     });
+  }
+
+  _dismissModal(context) {
+    Navigator.of(context).pop();
+  }
+
+  _showSimpleModalDialog(context) {
+    /// Consider making a map of kit statuses or add a string status associated with the keycode in database.
+    bool _isKitInLab =
+        false; // _currentKit['lab_received_at'] as int < DateTime.now() as int;
+    DateTime _labReceivedAt = DateTime(1970);
+    String _kitStatus = "";
+    Map<String, bool> values = {
+      'No RSC in pouch': false,
+      'Damaged pouch': false,
+      'There are strips but no RSC': false,
+      'Other': false,
+    };
+
+    switch (_currentKit["status"]) {
+      case 0:
+        _kitStatus = "Sample ordered by member.";
+        break;
+      case 1:
+        _kitStatus = "Sample shipped from Qvin.";
+        break;
+      case 2:
+        _kitStatus = "Sample received by shipping carrier from Qvin.";
+        break;
+      case 3:
+        _kitStatus = "Sample received by member.";
+        break;
+      case 4:
+        _kitStatus = "Sample shipped by member.";
+        break;
+      case 5:
+        _kitStatus = "Sample received by Qvin from member.";
+        break;
+      case 6:
+        _kitStatus = "Sample received by Qvin lab.";
+        break;
+      case 7:
+        _kitStatus = "Sample processed and accepted by Qvin lab.";
+        break;
+      case 8:
+        _kitStatus = "Sample stored in walk-in 1.";
+        break;
+      case -1:
+        _kitStatus = "Sample rejected by lab.";
+        break;
+    }
+
+    if (_currentKit['lab_received_at'] != null) {
+      DateTime tempDate = DateTime.parse(_currentKit['lab_received_at']);
+      if (tempDate.millisecondsSinceEpoch <=
+          DateTime.now().millisecondsSinceEpoch) {
+        _isKitInLab = true;
+      }
+    }
+
+    /// in milliseconds.
+
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          /// TODO: Probably need something different than Dialog to allow an "x" to dismiss.
+          return Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            child: Container(
+              constraints: const BoxConstraints(
+                  maxWidth: 520.0, minHeight: 320.0, maxHeight: 520),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 16, 0, 24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        const Spacer(),
+                        TextButton(
+                            onPressed: () => {_dismissModal(context)},
+                            child: Text("X")),
+                      ],
+                    ),
+                    Spacer(),
+                    if (_isKitInLab == false)
+                      ListView(
+                        children: [
+                          RichText(
+                            textAlign: TextAlign.justify,
+                            text: TextSpan(
+                              text: "Current kit status:",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 18,
+                                color: Colors.black,
+                                wordSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 16,
+                          ),
+                          RichText(
+                            textAlign: TextAlign.justify,
+                            text: TextSpan(
+                              text: "$_kitStatus",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                                color: Colors.black,
+                                wordSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 16,
+                          ),
+                          RichText(
+                            textAlign: TextAlign.justify,
+                            text: TextSpan(
+                              text: "Is this kit in the laboratory?",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 18,
+                                color: Colors.black,
+                                wordSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          ElevatedButton(
+                              onPressed: () => {_dismissModal(context)},
+                              child: Text("GOT IT")),
+                        ],
+                      ),
+                    if (_isKitInLab == true)
+                      Column(
+                        children: [
+                          Text(
+                            "Review kit",
+                            style: TextStyle(fontSize: 24),
+                          ),
+                          SizedBox(height: 16),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(24, 0, 24, 8),
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                text:
+                                    "Is it okay, or does the kit need to be rejected for any of the following reasons?",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                  wordSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 320,
+                            child: Column(
+                              children: values.keys.map((String key) {
+                                return new CheckboxListTile(
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                  title: Text(key),
+                                  value: values[key],
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      values[key] = value ?? true;
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 80),
+                          ElevatedButton(
+                              onPressed: () => {_dismissModal(context)},
+                              child: Text("SAVE")),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
   }
 
   Future<void> _getStripsBy(List<String> ids,
@@ -113,8 +314,10 @@ class _KitReviewViewState extends State<KitReviewView> {
         onSuccess(data);
       }
     } on PostgrestException catch (error) {
+      _currentKit = {};
       context.showErrorSnackBar(message: error.message);
     } catch (error) {
+      _currentKit = {};
       context.showErrorSnackBar(message: 'An unexpected exception occurred');
     }
   }
